@@ -632,9 +632,6 @@ const SUPABASE_URL = 'https://jccjcxwyxhvxaebgumim.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpjY2pjeHd5eGh2eGFlYmd1bWltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNjQzMzYsImV4cCI6MjA5MDc0MDMzNn0.WFkYY72zI9bwV4d3H5xx8zsmK-inZN5lmxvEjfHbp9M';
 
 
-// Supabase Config
-
-
 
 
 
@@ -1112,6 +1109,33 @@ function getTierTimer(tier){
 
 updateFees();
 initSliders();
+
+async function sbFetch(path, options={}) {
+  const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
+    ...options,
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': options.method === 'PATCH' ? 'return=representation' : '',
+      ...(options.headers || {})
+    }
+  });
+  return res.json();
+}
+
+async function sbGetSettings() {
+  const data = await sbFetch('settings?id=eq.1&select=data');
+  return data?.[0]?.data || {};
+}
+
+async function sbSaveSettings(settings) {
+  await sbFetch('settings?id=eq.1', {
+    method: 'PATCH',
+    body: JSON.stringify({ data: settings })
+  });
+}
+
 </script>
 </body>
 </html>
