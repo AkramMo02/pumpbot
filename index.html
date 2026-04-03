@@ -995,23 +995,12 @@ async function saveSettings(){
     TIER4_TIMER: g('s3')?.value || 30,
   };
   try {
-    const res = await fetch(API+'/api/settings', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify(settings)
-    });
-    const data = await res.json();
-    if(data.success){
-      btn.textContent='✓ SAVED';
-      btn.style.background='#00cc6a';
-      g('saveStatus').classList.add('show');
-      log('Settings saved & bot restarted','s');
-      setTimeout(()=>{btn.textContent='💾 SAVE SETTINGS';btn.style.background='';g('saveStatus').classList.remove('show');},2000);
-    } else {
-      btn.textContent='❌ Error';
-      log('Save error: '+data.error,'e');
-      setTimeout(()=>{btn.textContent='💾 SAVE SETTINGS';btn.style.background='';},2000);
-    }
+    await sbSaveSettings(settings);
+    btn.textContent='✓ SAVED';
+    btn.style.background='#00cc6a';
+    g('saveStatus').classList.add('show');
+    log('Settings saved ✓','s');
+    setTimeout(()=>{btn.textContent='💾 SAVE SETTINGS';btn.style.background='';g('saveStatus').classList.remove('show');},2000);
   } catch(err) {
     btn.textContent='❌ No connection';
     log('Cannot reach server: '+err.message,'e');
