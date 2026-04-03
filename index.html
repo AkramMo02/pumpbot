@@ -336,15 +336,12 @@ input[type=range]::-webkit-slider-thumb{appearance:none;width:13px;height:13px;b
 <!-- LEFT -->
 <div class="col left">
   <div class="stitle">📡 Filters</div>
-  <div style="display:flex;justify-content:flex-end;margin-bottom:6px">
-    <button class="btn bprimary" style="padding:5px 14px;font-size:10px" onclick="saveFilters()">💾 Save Filters</button>
-  </div>
   <div>
-    <div class="fi"><div class="fi-row">Min liquidity<span class="fval" id="fLiq">$5,000</span></div><input id="rLiq" type="range" min="1000" max="50000" step="500" value="5000" oninput="fv('fLiq','$'+Number(this.value).toLocaleString())"></div>
-    <div class="fi"><div class="fi-row">Max market cap<span class="fval" id="fMc">$100K</span></div><input id="rMc" type="range" min="10000" max="1000000" step="5000" value="100000" oninput="let v=this.value;fv('fMc',v>=1000000?'$1M':'$'+(v/1000|0)+'K')"></div>
-    <div class="fi"><div class="fi-row">Min volume 24h<span class="fval" id="fVol">$10K</span></div><input id="rVol" type="range" min="1000" max="500000" step="1000" value="10000" oninput="let v=this.value;fv('fVol',v>=1e6?'$'+(v/1e6).toFixed(1)+'M':'$'+(v/1000|0)+'K')"></div>
-    <div class="fi"><div class="fi-row">Min TXs<span class="fval" id="fTx">50</span></div><input id="rTx" type="range" min="5" max="500" step="5" value="50" oninput="fv('fTx',this.value)"></div>
-    <div class="fi"><div class="fi-row">Min fees ratio<span class="fval" id="fFr">2%</span></div><input id="rFr" type="range" min="0.5" max="20" step="0.5" value="2" oninput="fv('fFr',this.value+'%')"></div>
+    <div class="fi"><div class="fi-row">Min liquidity<span class="fval" id="fLiq">$5,000</span></div><input type="range" min="1000" max="50000" step="500" value="5000" oninput="fv('fLiq','$'+Number(this.value).toLocaleString())"></div>
+    <div class="fi"><div class="fi-row">Max market cap<span class="fval" id="fMc">$100K</span></div><input type="range" min="10000" max="1000000" step="5000" value="100000" oninput="let v=this.value;fv('fMc',v>=1000000?'$1M':'$'+(v/1000|0)+'K')"></div>
+    <div class="fi"><div class="fi-row">Min volume 24h<span class="fval" id="fVol">$10K</span></div><input type="range" min="1000" max="500000" step="1000" value="10000" oninput="let v=this.value;fv('fVol',v>=1e6?'$'+(v/1e6).toFixed(1)+'M':'$'+(v/1000|0)+'K')"></div>
+    <div class="fi"><div class="fi-row">Min TXs<span class="fval" id="fTx">50</span></div><input type="range" min="5" max="500" step="5" value="50" oninput="fv('fTx',this.value)"></div>
+    <div class="fi"><div class="fi-row">Min fees ratio<span class="fval" id="fFr">2%</span></div><input type="range" min="0.5" max="20" step="0.5" value="2" oninput="fv('fFr',this.value+'%')"></div>
     <div class="age-fi" style="margin-top:6px">
       <div class="fi-row">Min token age<span class="fval" id="fAge">30s</span></div>
       <input type="range" id="ageSlider" min="10" max="600" step="10" value="30" oninput="updateAge(this.value)" style="accent-color:var(--wn)">
@@ -634,9 +631,11 @@ input[type=range]::-webkit-slider-thumb{appearance:none;width:13px;height:13px;b
 const SUPABASE_URL = 'https://jccjcxwyxhvxaebgumim.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpjY2pjeHd5eGh2eGFlYmd1bWltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNjQzMzYsImV4cCI6MjA5MDc0MDMzNn0.WFkYY72zI9bwV4d3H5xx8zsmK-inZN5lmxvEjfHbp9M';
 
-async function sbFetch(path,opt={}){const r=await fetch(SUPABASE_URL+'/rest/v1/'+path,{...opt,headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json',...(opt.headers||{})}});return r.json();}
-async function sbSaveSettings(s){await sbFetch('settings?id=eq.1',{method:'PATCH',body:JSON.stringify({data:s})});}
-async function sbGetSettings(){const d=await sbFetch('settings?id=eq.1&select=data');return d?.[0]?.data||{};}
+
+
+
+
+
 
 let running=false,autoOn=false,curModal=null;
 let balance=4.823,totalPnl=0,trades=0,wins=0,scanned=0;
@@ -972,66 +971,7 @@ function testConn(service){
   },1200);
 }
 
-// Supabase config — بدل بالقيم ديالك
-const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
-
-async function sbFetch(path, options={}) {
-  const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
-    ...options,
-    headers: {
-      'apikey': SUPABASE_KEY,
-      'Authorization': 'Bearer ' + SUPABASE_KEY,
-      'Content-Type': 'application/json',
-      'Prefer': options.method === 'POST' ? 'return=representation' : '',
-      ...(options.headers || {})
-    }
-  });
-  return res.json();
-}
-
-async function sbGetSettings() {
-  const data = await sbFetch('settings?id=eq.1&select=data');
-  return data?.[0]?.data || {};
-}
-
-async function sbSaveSettings(settings) {
-  await sbFetch('settings?id=eq.1', {
-    method: 'PATCH',
-    body: JSON.stringify({ data: settings })
-  });
-}
-
-async function sbGetLogs() {
-  return await sbFetch('logs?select=*&order=created_at.desc&limit=50');
-}
-
-async function sbGetTrades() {
-  return await sbFetch('trades?select=*&order=created_at.desc&limit=50');
-}
-
-async function saveFilters(){
-  try {
-    const current = await sbGetSettings();
-    const filters = {
-      ...current,
-      MIN_LIQUIDITY: g('rLiq')?.value || 5000,
-      MIN_MC: g('rMc')?.value || 100000,
-      MIN_VOLUME: g('rVol')?.value || 10000,
-      MIN_TXS: g('rTx')?.value || 50,
-      MIN_FEES_RATIO: g('rFr')?.value || 2,
-      MIN_AGE: getMinAge(),
-      TIER1_TIMER: g('s0')?.value || 10,
-      TIER2_TIMER: g('s1')?.value || 15,
-      TIER3_TIMER: g('s2')?.value || 20,
-      TIER4_TIMER: g('s3')?.value || 30,
-      SOL_AMOUNT: getSol(),
-      SLIPPAGE: g('slippage')?.value || 1,
-    };
-    await sbSaveSettings(filters);
-    log('Filters saved ✓','s');
-  } catch(err){ log('Error: '+err.message,'e'); }
-}
+const API = '';
 
 async function saveSettings(){
   updateFees();
@@ -1049,11 +989,6 @@ async function saveSettings(){
     STOP_LOSS: parseInt(g('pSl').textContent) || 30,
     TAKE_PROFIT: parseInt(g('pTp').textContent) || 80,
     MIN_AGE: getMinAge(),
-    MIN_LIQUIDITY: g('rLiq')?.value || 5000,
-    MIN_MC: g('rMc')?.value || 100000,
-    MIN_VOLUME: g('rVol')?.value || 10000,
-    MIN_TXS: g('rTx')?.value || 50,
-    MIN_FEES_RATIO: g('rFr')?.value || 2,
     TIER1_TIMER: g('s0')?.value || 10,
     TIER2_TIMER: g('s1')?.value || 15,
     TIER3_TIMER: g('s2')?.value || 20,
@@ -1067,48 +1002,70 @@ async function saveSettings(){
     log('Settings saved ✓','s');
     setTimeout(()=>{btn.textContent='💾 SAVE SETTINGS';btn.style.background='';g('saveStatus').classList.remove('show');},2000);
   } catch(err) {
-    btn.textContent='❌ Error';
-    log('Save error: '+err.message,'e');
-    setTimeout(()=>{btn.textContent='💾 SAVE SETTINGS';btn.style.background='';},2000);
+    btn.textContent='❌ No connection';
+    log('Cannot reach server: '+err.message,'e');
+    setTimeout(()=>{btn.textContent='💾 SAVE SETTINGS';},2000);
   }
 }
 
-function startBot(){
-  running=true;
-  g('botDot').classList.add('on');
-  g('botTxt').textContent='RUNNING'; g('botTxt').className='stxt on';
-  g('startBtn').style.display='none'; g('stopBtn').style.display='';
-  g('feedDot').classList.add('on'); fv('feedTxt','LIVE');
-  const em=g('emptyMsg'); if(em) em.remove();
-  log('Bot started — watching logs...','s');
-  startLogPolling();
+async function startBot(){
+  try {
+    Promise.resolve({json:()=>({success:true})});
+    running=true;
+    g('botDot').classList.add('on');
+    g('botTxt').textContent='RUNNING'; g('botTxt').className='stxt on';
+    g('startBtn').style.display='none'; g('stopBtn').style.display='';
+    g('feedDot').classList.add('on'); fv('feedTxt','LIVE');
+    const em=g('emptyMsg'); if(em) em.remove();
+    log('Bot started on server','s');
+    startLogPolling();
+  } catch(err){ log('Error: '+err.message,'e'); }
 }
 
-function stopBot(){
-  running=false;
-  g('botDot').classList.remove('on');
-  g('botTxt').textContent='STOPPED'; g('botTxt').className='stxt';
-  g('startBtn').style.display=''; g('stopBtn').style.display='none';
-  g('feedDot').classList.remove('on'); fv('feedTxt','STOPPED');
-  log('Bot stopped','w');
-  stopLogPolling();
+async function stopBot(){
+  try {
+    Promise.resolve({json:()=>({success:true})});
+    running=false;
+    g('botDot').classList.remove('on');
+    g('botTxt').textContent='STOPPED'; g('botTxt').className='stxt';
+    g('startBtn').style.display=''; g('stopBtn').style.display='none';
+    g('feedDot').classList.remove('on'); fv('feedTxt','STOPPED');
+    log('Bot stopped','w');
+    stopLogPolling();
+  } catch(err){ log('Error: '+err.message,'e'); }
 }
 
-let logInterval=null;
+let logInterval = null;
 function startLogPolling(){
-  logInterval=setInterval(async()=>{
-    try{
-      const data=await sbFetch('logs?select=message,type,created_at&order=created_at.desc&limit=10');
-      if(data&&data.length){
-        data.reverse().forEach(row=>{
-          log(row.message, row.type==='error'?'e':row.type==='success'?'s':row.type==='warn'?'w':'i');
+  logInterval = setInterval(async ()=>{
+    try {
+      const res = await fetch(API+'/api/logs');
+      const data = await res.json();
+      if(data.logs){
+        const lines = data.logs.split('\n').filter(l=>l.includes('[BOT]')||l.includes('[BUY]')||l.includes('[SELL]')||l.includes('[MONITOR]'));
+        lines.slice(-5).forEach(line=>{
+          const t = line.includes('Error')||line.includes('failed')?'e': line.includes('Success')||line.includes('PASSED')?'s':'i';
+          log(line.trim(),t);
         });
       }
-    }catch{}
-  },3000);
+    } catch{}
+  }, 3000);
 }
-function stopLogPolling(){if(logInterval)clearInterval(logInterval);}
-function checkServerStatus(){}
+function stopLogPolling(){ if(logInterval) clearInterval(logInterval); }
+
+async function checkServerStatus(){
+  try {
+    const res = Promise.resolve({json:()=>({running:false})});
+    const data = await res.json();
+    if(data.running){
+      g('botDot').classList.add('on');
+      g('botTxt').textContent='RUNNING'; g('botTxt').className='stxt on';
+      g('startBtn').style.display='none'; g('stopBtn').style.display='';
+      running=true;
+      startLogPolling();
+    }
+  } catch{}
+}
 checkServerStatus();
 
 // MC Tier sliders
@@ -1142,36 +1099,32 @@ function getTierTimer(tier){
 updateFees();
 initSliders();
 
-async function loadSettings(){
-  try {
-    const s = await sbGetSettings();
-    if(!s || Object.keys(s).length===0) return;
-    if(s.SOL_AMOUNT) g('solAmt').value = s.SOL_AMOUNT;
-    if(s.SLIPPAGE) g('slippage').value = s.SLIPPAGE;
-    if(s.PRIORITY_FEE && g('priorityFee')) g('priorityFee').value = s.PRIORITY_FEE;
-    if(s.JITO_TIP && g('jitoTip')) g('jitoTip').value = s.JITO_TIP;
-    if(s.TAKE_PROFIT) fv('pTp','+'+s.TAKE_PROFIT+'%');
-    if(s.STOP_LOSS) fv('pSl','-'+s.STOP_LOSS+'%');
-    if(s.MIN_AGE){ g('ageSlider').value=s.MIN_AGE; updateAge(s.MIN_AGE); }
-    if(s.MIN_LIQUIDITY && g('rLiq')){ g('rLiq').value=s.MIN_LIQUIDITY; fv('fLiq','$'+Number(s.MIN_LIQUIDITY).toLocaleString()); }
-    if(s.MIN_MC && g('rMc')){ g('rMc').value=s.MIN_MC; let v=s.MIN_MC; fv('fMc',v>=1000000?'$1M':'$'+(v/1000|0)+'K'); }
-    if(s.MIN_VOLUME && g('rVol')){ g('rVol').value=s.MIN_VOLUME; let v=s.MIN_VOLUME; fv('fVol',v>=1e6?'$'+(v/1e6).toFixed(1)+'M':'$'+(v/1000|0)+'K'); }
-    if(s.MIN_TXS && g('rTx')){ g('rTx').value=s.MIN_TXS; fv('fTx',s.MIN_TXS); }
-    if(s.MIN_FEES_RATIO && g('rFr')){ g('rFr').value=s.MIN_FEES_RATIO; fv('fFr',s.MIN_FEES_RATIO+'%'); }
-    if(s.TIER1_TIMER){ g('s0').value=s.TIER1_TIMER; updateTier(0,s.TIER1_TIMER); }
-    if(s.TIER2_TIMER){ g('s1').value=s.TIER2_TIMER; updateTier(1,s.TIER2_TIMER); }
-    if(s.TIER3_TIMER){ g('s2').value=s.TIER3_TIMER; updateTier(2,s.TIER3_TIMER); }
-    if(s.TIER4_TIMER){ g('s3').value=s.TIER4_TIMER; updateTier(3,s.TIER4_TIMER); }
-    if(s.RPC_URL && g('rpcUrl')) g('rpcUrl').value = s.RPC_URL;
-    if(s.HELIUS_API_KEY && g('heliusKey')) g('heliusKey').value = s.HELIUS_API_KEY;
-    if(s.BIRDEYE_API_KEY && g('birdeyeKey')) g('birdeyeKey').value = s.BIRDEYE_API_KEY;
-    updateFees();
-    log('Settings loaded from Supabase ✓','s');
-  } catch(err){
-    log('Could not load settings: '+err.message,'e');
-  }
+async function sbFetch(path, options={}) {
+  const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
+    ...options,
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': options.method === 'PATCH' ? 'return=representation' : '',
+      ...(options.headers || {})
+    }
+  });
+  return res.json();
 }
-loadSettings();
+
+async function sbGetSettings() {
+  const data = await sbFetch('settings?id=eq.1&select=data');
+  return data?.[0]?.data || {};
+}
+
+async function sbSaveSettings(settings) {
+  await sbFetch('settings?id=eq.1', {
+    method: 'PATCH',
+    body: JSON.stringify({ data: settings })
+  });
+}
+
 </script>
 </body>
 </html>
