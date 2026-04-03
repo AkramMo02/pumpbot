@@ -336,6 +336,9 @@ input[type=range]::-webkit-slider-thumb{appearance:none;width:13px;height:13px;b
 <!-- LEFT -->
 <div class="col left">
   <div class="stitle">📡 Filters</div>
+  <div style="display:flex;justify-content:flex-end;margin-bottom:6px">
+    <button class="btn bprimary" style="padding:5px 14px;font-size:10px" onclick="saveFilters()">💾 Save Filters</button>
+  </div>
   <div>
     <div class="fi"><div class="fi-row">Min liquidity<span class="fval" id="fLiq">$5,000</span></div><input id="rLiq" type="range" min="1000" max="50000" step="500" value="5000" oninput="fv('fLiq','$'+Number(this.value).toLocaleString())"></div>
     <div class="fi"><div class="fi-row">Max market cap<span class="fval" id="fMc">$100K</span></div><input id="rMc" type="range" min="10000" max="1000000" step="5000" value="100000" oninput="let v=this.value;fv('fMc',v>=1000000?'$1M':'$'+(v/1000|0)+'K')"></div>
@@ -997,6 +1000,29 @@ async function sbGetLogs() {
 
 async function sbGetTrades() {
   return await sbFetch('trades?select=*&order=created_at.desc&limit=50');
+}
+
+async function saveFilters(){
+  try {
+    const current = await sbGetSettings();
+    const filters = {
+      ...current,
+      MIN_LIQUIDITY: g('rLiq')?.value || 5000,
+      MIN_MC: g('rMc')?.value || 100000,
+      MIN_VOLUME: g('rVol')?.value || 10000,
+      MIN_TXS: g('rTx')?.value || 50,
+      MIN_FEES_RATIO: g('rFr')?.value || 2,
+      MIN_AGE: getMinAge(),
+      TIER1_TIMER: g('s0')?.value || 10,
+      TIER2_TIMER: g('s1')?.value || 15,
+      TIER3_TIMER: g('s2')?.value || 20,
+      TIER4_TIMER: g('s3')?.value || 30,
+      SOL_AMOUNT: getSol(),
+      SLIPPAGE: g('slippage')?.value || 1,
+    };
+    await sbSaveSettings(filters);
+    log('Filters saved ✓','s');
+  } catch(err){ log('Error: '+err.message,'e'); }
 }
 
 async function saveSettings(){
