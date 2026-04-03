@@ -335,7 +335,7 @@ input[type=range]::-webkit-slider-thumb{appearance:none;width:13px;height:13px;b
 
 <!-- LEFT -->
 <div class="col left">
-  <div class="stitle">📡 Filters</div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span class="stitle" style="margin:0">📡 Filters</span><button onclick="saveFilters()" style="padding:4px 12px;background:#00ff88;color:#000;border:none;border-radius:5px;font-size:10px;font-family:Space Mono,monospace;font-weight:700;cursor:pointer">💾 SAVE</button></div>
   <div>
     <div class="fi"><div class="fi-row">Min liquidity<span class="fval" id="fLiq">$5,000</span></div><input type="range" min="1000" max="50000" step="500" value="5000" oninput="fv('fLiq','$'+Number(this.value).toLocaleString())"></div>
     <div class="fi"><div class="fi-row">Max market cap<span class="fval" id="fMc">$100K</span></div><input type="range" min="10000" max="1000000" step="5000" value="100000" oninput="let v=this.value;fv('fMc',v>=1000000?'$1M':'$'+(v/1000|0)+'K')"></div>
@@ -627,15 +627,37 @@ input[type=range]::-webkit-slider-thumb{appearance:none;width:13px;height:13px;b
 </div>
 
 <script>
+
 // Supabase Config
 const SUPABASE_URL = 'https://jccjcxwyxhvxaebgumim.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpjY2pjeHd5eGh2eGFlYmd1bWltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNjQzMzYsImV4cCI6MjA5MDc0MDMzNn0.WFkYY72zI9bwV4d3H5xx8zsmK-inZN5lmxvEjfHbp9M';
 
-
-
-
-
-
+async function sbFetch(path,opt={}){
+  const r=await fetch(SUPABASE_URL+'/rest/v1/'+path,{...opt,headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json',...(opt.headers||{})}});
+  return r.json();
+}
+async function sbSave(s){await sbFetch('settings?id=eq.1',{method:'PATCH',body:JSON.stringify({data:s})});}
+async function sbLoad(){const d=await sbFetch('settings?id=eq.1&select=data');return d?.[0]?.data||{};}
+async function saveFilters(){
+  try{
+    const s={
+      MIN_LIQUIDITY:document.getElementById('rLiq')?.value||5000,
+      MIN_MC:document.getElementById('rMc')?.value||100000,
+      MIN_VOLUME:document.getElementById('rVol')?.value||10000,
+      MIN_TXS:document.getElementById('rTx')?.value||50,
+      MIN_FEES_RATIO:document.getElementById('rFr')?.value||2,
+      MIN_AGE:document.getElementById('ageSlider')?.value||30,
+      TIER1_TIMER:document.getElementById('s0')?.value||10,
+      TIER2_TIMER:document.getElementById('s1')?.value||15,
+      TIER3_TIMER:document.getElementById('s2')?.value||20,
+      TIER4_TIMER:document.getElementById('s3')?.value||30,
+      SOL_AMOUNT:document.getElementById('solAmt')?.value||0.1,
+      SLIPPAGE:document.getElementById('slippage')?.value||1,
+    };
+    await sbSave(s);
+    alert('Saved!');
+  }catch(e){alert('Error: '+e.message);}
+}
 
 let running=false,autoOn=false,curModal=null;
 let balance=4.823,totalPnl=0,trades=0,wins=0,scanned=0;
@@ -971,7 +993,7 @@ function testConn(service){
   },1200);
 }
 
-const API = '';
+const API = 'http://217.69.11.234:3001';
 
 async function saveSettings(){
   updateFees();
@@ -995,12 +1017,23 @@ async function saveSettings(){
     TIER4_TIMER: g('s3')?.value || 30,
   };
   try {
-    await sbSaveSettings(settings);
-    btn.textContent='✓ SAVED';
-    btn.style.background='#00cc6a';
-    g('saveStatus').classList.add('show');
-    log('Settings saved ✓','s');
-    setTimeout(()=>{btn.textContent='💾 SAVE SETTINGS';btn.style.background='';g('saveStatus').classList.remove('show');},2000);
+    const res = await fetch(API+'/api/settings', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(settings)
+    });
+    const data = await res.json();
+    if(data.success){
+      btn.textContent='✓ SAVED';
+      btn.style.background='#00cc6a';
+      g('saveStatus').classList.add('show');
+      log('Settings saved & bot restarted','s');
+      setTimeout(()=>{btn.textContent='💾 SAVE SETTINGS';btn.style.background='';g('saveStatus').classList.remove('show');},2000);
+    } else {
+      btn.textContent='❌ Error';
+      log('Save error: '+data.error,'e');
+      setTimeout(()=>{btn.textContent='💾 SAVE SETTINGS';btn.style.background='';},2000);
+    }
   } catch(err) {
     btn.textContent='❌ No connection';
     log('Cannot reach server: '+err.message,'e');
@@ -1010,7 +1043,7 @@ async function saveSettings(){
 
 async function startBot(){
   try {
-    Promise.resolve({json:()=>({success:true})});
+    await fetch(API+'/api/start', {method:'POST'});
     running=true;
     g('botDot').classList.add('on');
     g('botTxt').textContent='RUNNING'; g('botTxt').className='stxt on';
@@ -1024,7 +1057,7 @@ async function startBot(){
 
 async function stopBot(){
   try {
-    Promise.resolve({json:()=>({success:true})});
+    await fetch(API+'/api/stop', {method:'POST'});
     running=false;
     g('botDot').classList.remove('on');
     g('botTxt').textContent='STOPPED'; g('botTxt').className='stxt';
@@ -1055,7 +1088,7 @@ function stopLogPolling(){ if(logInterval) clearInterval(logInterval); }
 
 async function checkServerStatus(){
   try {
-    const res = Promise.resolve({json:()=>({running:false})});
+    const res = await fetch(API+'/api/status');
     const data = await res.json();
     if(data.running){
       g('botDot').classList.add('on');
@@ -1098,33 +1131,6 @@ function getTierTimer(tier){
 
 updateFees();
 initSliders();
-
-async function sbFetch(path, options={}) {
-  const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
-    ...options,
-    headers: {
-      'apikey': SUPABASE_KEY,
-      'Authorization': 'Bearer ' + SUPABASE_KEY,
-      'Content-Type': 'application/json',
-      'Prefer': options.method === 'PATCH' ? 'return=representation' : '',
-      ...(options.headers || {})
-    }
-  });
-  return res.json();
-}
-
-async function sbGetSettings() {
-  const data = await sbFetch('settings?id=eq.1&select=data');
-  return data?.[0]?.data || {};
-}
-
-async function sbSaveSettings(settings) {
-  await sbFetch('settings?id=eq.1', {
-    method: 'PATCH',
-    body: JSON.stringify({ data: settings })
-  });
-}
-
 </script>
 </body>
 </html>
