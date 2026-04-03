@@ -630,6 +630,14 @@ input[type=range]::-webkit-slider-thumb{appearance:none;width:13px;height:13px;b
 </div>
 
 <script>
+// Supabase Config
+const SUPABASE_URL = 'https://jccjcxwyxhvxaebgumim.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpjY2pjeHd5eGh2eGFlYmd1bWltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNjQzMzYsImV4cCI6MjA5MDc0MDMzNn0.WFkYY72zI9bwV4d3H5xx8zsmK-inZN5lmxvEjfHbp9M';
+
+async function sbFetch(path,opt={}){const r=await fetch(SUPABASE_URL+'/rest/v1/'+path,{...opt,headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json',...(opt.headers||{})}});return r.json();}
+async function sbSaveSettings(s){await sbFetch('settings?id=eq.1',{method:'PATCH',body:JSON.stringify({data:s})});}
+async function sbGetSettings(){const d=await sbFetch('settings?id=eq.1&select=data');return d?.[0]?.data||{};}
+
 let running=false,autoOn=false,curModal=null;
 let balance=4.823,totalPnl=0,trades=0,wins=0,scanned=0;
 let scanTimer=null;
